@@ -1,0 +1,10 @@
+Events==0.2.1
+Flask==0.11.1
+Flask-PyMongo==0.4.1
+greenlet==0.4.11
+grequests==0.3.0
+gunicorn==19.6.0
+httplib2==0.9.1
+pymongo==3.4.0
+requests==2.9.1
+Werkzeug==0.11.11

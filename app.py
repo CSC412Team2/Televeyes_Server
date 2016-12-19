@@ -3,6 +3,7 @@ import json
 from pymongo import MongoClient
 from pymongo import errors
 import utils
+import datetime
 
 client = MongoClient('mongodb://heroku_7plvr14k:ssqu1unoucs4diblm9n1p81p1u@ds139448.mlab.com:39448/heroku_7plvr14k')
 db = client.get_default_database()
@@ -57,6 +58,8 @@ def parseShows(resp):
 
     for i in j:
         utils.index_for_search(shows, i)
+        if i['premiered'] != None:
+            shows.update({'premiered': i['premiered']}, {'$set' : {'premiered' : datetime.datetime.strptime(i['premiered'], "%Y-%m-%d")}})
         getEpisodes(i['id'])
 
 getNextPage(1, parseShows)

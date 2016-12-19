@@ -1,9 +1,14 @@
-from flask import Flask, jsonify, logging, Response
+from flask import Flask, jsonify, logging, Response, request
 import sys
 from flask_pymongo import PyMongo
 import utils
 from bson import json_util
 import os
+import math
+import re
+
+
+#This file is the actual server
 
 app = Flask('televeyes')
 app.config['MONGO_URI'] = 'mongodb://heroku_7plvr14k:ssqu1unoucs4diblm9n1p81p1u@ds139448.mlab.com:39448/heroku_7plvr14k'
@@ -44,6 +49,44 @@ def search(name):
         }
     ).sort([("score", {"$meta": "textScore"})]
     ))
+    resp = Response(response=ret,
+                    status=200,
+                    mimetype="application/json")
+    return resp
+
+@app.route('/category/<string:cat>', methods=['GET'])
+def category(cat):
+    size = 50
+
+    cur = mongo.db.shows.find(
+        {
+            "genres": cat
+        },
+        {
+            "_id" : False,
+            "ngrams" : False
+        }
+    ).sort([('premiered' , 1)])
+
+    count = cur.count()
+
+    page = request.args.get('page', 1)
+
+    if not re.match('^[0-9]+$', str(page)):
+        page = 1
+
+    page = int(page)
+
+    if (page * size) > count:
+        return Response(status=404)
+
+    if page != 1:
+        cur.skip(size * (page - 1))
+
+    cur.limit(size)
+
+    ret = json_util.dumps(cur)
+
     resp = Response(response=ret,
                     status=200,
                     mimetype="application/json")
